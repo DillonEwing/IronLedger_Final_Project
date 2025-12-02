@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: ironledger
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "cd ironledger && gunicorn ironledger.wsgi:application"
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ironledger-db
+          property: connectionString
+
+databases:
+  - name: ironledger-db
+    databaseName: ironledger
+    user: ironledger
