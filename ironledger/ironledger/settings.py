@@ -108,8 +108,14 @@ DATABASES = {
         default='sqlite:///' + str(BASE_DIR / 'db.sqlite3'),
         conn_max_age=600,
         conn_health_checks=True,
+        ssl_require=False,
     )
 }
+
+# Session configuration
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_SECURE = False if DEBUG else True
+SESSION_COOKIE_HTTPONLY = True
 
 
 # Password validation
