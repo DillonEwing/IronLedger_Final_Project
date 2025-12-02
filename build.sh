@@ -21,6 +21,9 @@ python manage.py migrate --no-input
 echo "Creating superuser from environment variables..."
 python manage.py create_superuser_from_env
 
+echo "Populating sample workout data..."
+python manage.py populate_sample_data
+
 echo "Returning to project root..."
 popd
 

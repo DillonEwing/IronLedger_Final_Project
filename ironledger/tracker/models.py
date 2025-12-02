@@ -28,11 +28,24 @@ class GlobalExercise(models.Model):
         ('full_body', 'Full Body'),
     ]
     
+    WEIGHT_INCREMENT_CHOICES = [
+        ('plate', 'Plate Loading (2.5, 5, 10, 25, 35, 45 lbs)'),
+        ('pin', 'Pin/Cable (1 lb increments)'),
+    ]
+    
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     equipment_type = models.CharField(max_length=20, choices=EQUIPMENT_CHOICES, default='barbell')
     primary_muscle_group = models.CharField(max_length=20, choices=MUSCLE_GROUP_CHOICES)
     secondary_muscle_groups = models.CharField(max_length=100, blank=True, help_text="Comma-separated muscle groups")
+    
+    # Weight increment type for UI suggestions
+    weight_increment_type = models.CharField(
+        max_length=10, 
+        choices=WEIGHT_INCREMENT_CHOICES, 
+        default='plate',
+        help_text="How weight is incremented on this exercise"
+    )
     
     # Optional instructional content
     instructions = models.TextField(blank=True, help_text="How to perform the exercise")
@@ -59,6 +72,7 @@ class CustomExercise(models.Model):
     """
     EQUIPMENT_CHOICES = GlobalExercise.EQUIPMENT_CHOICES
     MUSCLE_GROUP_CHOICES = GlobalExercise.MUSCLE_GROUP_CHOICES
+    WEIGHT_INCREMENT_CHOICES = GlobalExercise.WEIGHT_INCREMENT_CHOICES
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='custom_exercises')
     name = models.CharField(max_length=200)
@@ -66,6 +80,14 @@ class CustomExercise(models.Model):
     equipment_type = models.CharField(max_length=20, choices=EQUIPMENT_CHOICES, default='barbell')
     primary_muscle_group = models.CharField(max_length=20, choices=MUSCLE_GROUP_CHOICES)
     secondary_muscle_groups = models.CharField(max_length=100, blank=True)
+    
+    # Weight increment type for UI suggestions
+    weight_increment_type = models.CharField(
+        max_length=10, 
+        choices=WEIGHT_INCREMENT_CHOICES, 
+        default='plate',
+        help_text="How weight is incremented on this exercise"
+    )
     
     # Metadata
     created_at = models.DateTimeField(auto_now_add=True)

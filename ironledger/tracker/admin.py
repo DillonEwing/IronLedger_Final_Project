@@ -31,13 +31,13 @@ class LoggedSetInline(admin.TabularInline):
 # Main admin classes
 @admin.register(GlobalExercise)
 class GlobalExerciseAdmin(admin.ModelAdmin):
-    list_display = ['name', 'equipment_type', 'primary_muscle_group', 'is_active', 'created_at']
-    list_filter = ['equipment_type', 'primary_muscle_group', 'is_active']
+    list_display = ['name', 'equipment_type', 'primary_muscle_group', 'weight_increment_type', 'is_active', 'created_at']
+    list_filter = ['equipment_type', 'primary_muscle_group', 'weight_increment_type', 'is_active']
     search_fields = ['name', 'description']
     readonly_fields = ['created_at', 'updated_at']
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'equipment_type')
+            'fields': ('name', 'description', 'equipment_type', 'weight_increment_type')
         }),
         ('Muscle Groups', {
             'fields': ('primary_muscle_group', 'secondary_muscle_groups')
@@ -55,8 +55,8 @@ class GlobalExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(CustomExercise)
 class CustomExerciseAdmin(admin.ModelAdmin):
-    list_display = ['name', 'user', 'equipment_type', 'primary_muscle_group', 'is_active']
-    list_filter = ['equipment_type', 'primary_muscle_group', 'is_active', 'user']
+    list_display = ['name', 'user', 'equipment_type', 'primary_muscle_group', 'weight_increment_type', 'is_active']
+    list_filter = ['equipment_type', 'primary_muscle_group', 'weight_increment_type', 'is_active', 'user']
     search_fields = ['name', 'user__username', 'description']
     readonly_fields = ['created_at', 'updated_at']
     autocomplete_fields = ['user']
