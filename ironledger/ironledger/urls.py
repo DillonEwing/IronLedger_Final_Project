@@ -15,26 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from django.http import HttpResponse
-
-def home(request):
-    return HttpResponse("""
-        <html>
-            <head><title>IronLedger</title></head>
-            <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px;">
-                <h1>🎉 IronLedger is Live!</h1>
-                <p>Your Django application has been successfully deployed on Render!</p>
-                <ul>
-                    <li><a href="/admin/">Admin Panel</a></li>
-                </ul>
-                <hr>
-                <p><small>Deployed from GitHub repository: IronLedger_Final_Project</small></p>
-            </body>
-        </html>
-    """)
+from django.urls import path, include
 
 urlpatterns = [
-    path('', home, name='home'),
+    path('', include('tracker.urls')),
     path('admin/', admin.site.urls),
 ]

@@ -10,7 +10,7 @@ services:
     autoDeploy: true  # Auto-deploy when you push to main branch
     envVars:
       - key: DEBUG
-        value: True
+        value: False
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
