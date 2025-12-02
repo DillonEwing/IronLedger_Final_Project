@@ -81,11 +81,19 @@ def dashboard(request):
         is_active=True
     ).first()
     
-    # Get available workout plans
-    workout_plans = WorkoutPlan.objects.filter(
-        Q(user=request.user) | Q(privacy='shared'),
+    # Get available workout plans (user's own and shared plans)
+    user_plans = WorkoutPlan.objects.filter(
+        user=request.user,
         is_active=True
-    ).order_by('-updated_at')
+    ).prefetch_related('planned_exercises').order_by('-updated_at')[:5]
+    
+    shared_plans = WorkoutPlan.objects.filter(
+        privacy='shared',
+        is_active=True
+    ).exclude(user=request.user).prefetch_related('planned_exercises').order_by('-times_used')[:5]
+    
+    # Combine for display
+    workout_plans = list(user_plans) + list(shared_plans)
     
     context = {
         'recent_workouts': recent_workouts,
