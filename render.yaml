@@ -2,21 +2,27 @@ services:
   - type: web
     name: ironledger
     runtime: python
+    plan: free  # Free tier
     buildCommand: "./build.sh"
     startCommand: "cd ironledger && gunicorn ironledger.wsgi:application"
+    healthCheckPath: /  # Optional: Render will ping this to check if app is running
+    autoDeploy: true  # Auto-deploy when you push to main branch
     envVars:
       - key: DEBUG
         value: False
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        sync: false
+        value: ironledger.onrender.com  # UPDATE THIS with your actual Render URL
       - key: DATABASE_URL
         fromDatabase:
           name: ironledger-db
           property: connectionString
+      - key: PYTHON_VERSION
+        value: 3.11.0  # Specify Python version
 
 databases:
   - name: ironledger-db
+    plan: free  # Free for 90 days, then $7/month
     databaseName: ironledger
     user: ironledger
