@@ -18,6 +18,9 @@ python manage.py collectstatic --no-input --clear
 echo "Running migrations..."
 python manage.py migrate --no-input
 
+echo "Creating superuser from environment variables..."
+python manage.py create_superuser_from_env
+
 echo "Returning to project root..."
 popd
 
