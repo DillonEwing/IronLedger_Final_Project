@@ -22,5 +22,7 @@ urlpatterns = [
     path('api/set/add/<int:session_exercise_id>/', views.add_set, name='add_set'),
     path('api/set/<int:set_id>/update/', views.update_set, name='update_set'),
     path('api/set/<int:set_id>/delete/', views.delete_set, name='delete_set'),
+    path('api/exercise/<int:session_exercise_id>/complete/', views.complete_exercise, name='complete_exercise'),
+    path('api/exercise/<int:session_exercise_id>/select/<int:next_exercise_id>/', views.select_next_exercise, name='select_next_exercise'),
     path('api/plates/calculate/', views.calculate_plates, name='calculate_plates'),
 ]

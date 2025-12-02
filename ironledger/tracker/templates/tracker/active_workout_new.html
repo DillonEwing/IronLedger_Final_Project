@@ -1,0 +1,479 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}{{ workout.name }} - Active Workout{% endblock %}
+
+{% block extra_css %}
+<style>
+    .progress-bar-custom {
+        height: 30px;
+        font-size: 1rem;
+        font-weight: bold;
+    }
+    
+    .exercise-card-current {
+        border: 3px solid var(--iron-accent);
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.3);
+    }
+    
+    .set-badge {
+        font-size: 1.2rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .weight-input, .reps-input {
+        font-size: 1.5rem;
+        height: 60px;
+        text-align: center;
+        font-weight: bold;
+    }
+    
+    .increment-btn {
+        height: 60px;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+    
+    .plate-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border-radius: 25px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        background: linear-gradient(135deg, var(--iron-primary) 0%, var(--iron-accent) 100%);
+    }
+    
+    .timer-display {
+        font-size: 4rem;
+        font-weight: bold;
+        font-family: 'Courier New', monospace;
+        color: var(--iron-highlight);
+    }
+    
+    .timer-active {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    
+    .action-button {
+        height: 70px;
+        font-size: 1.3rem;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Workout Header -->
+<div class="row mb-3">
+    <div class="col-12">
+        <h2 class="mb-2">
+            <i class="bi bi-activity"></i> {{ workout.name }}
+        </h2>
+        <div class="progress mb-2">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success progress-bar-custom" 
+                 style="width: {% widthratio completed_exercises total_exercises 100 %}%">
+                {{ completed_exercises }} / {{ total_exercises }} Exercises
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if all_completed %}
+<!-- All Exercises Completed -->
+<div class="alert alert-success">
+    <h4><i class="bi bi-check-circle-fill"></i> All Exercises Completed!</h4>
+    <p class="mb-0">Great work! Ready to finish this workout?</p>
+</div>
+<div class="text-center">
+    <a href="{% url 'end_workout' workout.id %}" class="btn btn-success btn-lg action-button">
+        <i class="bi bi-check-circle"></i> Finish Workout
+    </a>
+</div>
+
+{% else %}
+<!-- Current Exercise Card -->
+<div class="card exercise-card-current mb-4">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <span class="badge bg-warning text-dark me-2">Exercise {{ completed_exercises|add:1 }}/{{ total_exercises }}</span>
+                {{ current_exercise.get_exercise_name }}
+            </h3>
+            <div>
+                {% if exercise_obj.weight_increment_type == 'plate' %}
+                    <span class="badge bg-info"><i class="bi bi-disc"></i> Plate Loading</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-sliders"></i> Pin/Cable</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <!-- Completed Sets -->
+        {% if current_sets %}
+        <h5 class="mb-3"><i class="bi bi-check2-square"></i> Completed Sets</h5>
+        <div class="table-responsive mb-4">
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                        <th>Set</th>
+                        <th>Weight</th>
+                        <th>Reps</th>
+                        <th>Type</th>
+                        <th>Rest</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for set in current_sets %}
+                    <tr>
+                        <td><span class="set-badge badge bg-secondary">{{ set.set_number }}</span></td>
+                        <td><strong>{{ set.weight }} lbs</strong></td>
+                        <td><strong>{{ set.reps }}</strong></td>
+                        <td>
+                            {% if set.is_warmup %}
+                                <span class="badge bg-info">Warmup</span>
+                            {% elif set.is_dropset %}
+                                <span class="badge bg-warning text-dark">Drop</span>
+                            {% else %}
+                                <span class="badge bg-success">Working</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if set.rest_duration %}
+                                {{ set.rest_duration }}s
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteSet({{ set.id }})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> No sets logged yet. Start with your first set!
+        </div>
+        {% endif %}
+        
+        <!-- Rest Timer (shown between sets) -->
+        <div id="restTimerCard" class="card bg-dark border-warning mb-4" style="display: none;">
+            <div class="card-body text-center">
+                <h4 class="card-title"><i class="bi bi-stopwatch"></i> Rest Timer</h4>
+                <div class="timer-display mb-3" id="timerDisplay">00:00</div>
+                <div>
+                    <button class="btn btn-success btn-lg me-2" onclick="finishRest()">
+                        <i class="bi bi-play-fill"></i> Finish Rest & Next Set
+                    </button>
+                    <button class="btn btn-outline-light" onclick="resetTimer()">
+                        <i class="bi bi-arrow-clockwise"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Log New Set Form (shown when not resting) -->
+        <div id="logSetCard">
+            <h5 class="mb-3"><i class="bi bi-plus-circle"></i> Log Next Set</h5>
+            <form id="addSetForm" onsubmit="addSet(event)">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Weight (lbs)</strong></label>
+                        <div class="input-group input-group-lg">
+                            {% if exercise_obj.weight_increment_type == 'plate' %}
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustWeight(-5)">-5</button>
+                            {% else %}
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustWeight(-1)">-1</button>
+                            {% endif %}
+                            <input type="number" class="form-control weight-input" id="weightInput" name="weight" step="0.1" required value="{% if current_sets %}{{ current_sets.last.weight }}{% else %}0{% endif %}">
+                            {% if exercise_obj.weight_increment_type == 'plate' %}
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustWeight(5)">+5</button>
+                            {% else %}
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustWeight(1)">+1</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Reps</strong></label>
+                        <div class="input-group input-group-lg">
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustReps(-1)">-</button>
+                            <input type="number" class="form-control reps-input" id="repsInput" name="reps" min="0" required value="{% if current_sets %}{{ current_sets.last.reps }}{% else %}0{% endif %}">
+                            <button type="button" class="btn btn-outline-secondary increment-btn" onclick="adjustReps(1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label"><strong>Set Type</strong></label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="set_type" id="typeWorking" value="working" checked>
+                            <label class="btn btn-outline-success" for="typeWorking">Working</label>
+                            
+                            <input type="radio" class="btn-check" name="set_type" id="typeWarmup" value="warmup">
+                            <label class="btn btn-outline-info" for="typeWarmup">Warmup</label>
+                            
+                            <input type="radio" class="btn-check" name="set_type" id="typeDropset" value="dropset">
+                            <label class="btn btn-outline-warning" for="typeDropset">Dropset</label>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if exercise_obj.weight_increment_type == 'plate' %}
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-info btn-sm" onclick="togglePlateCalculator()">
+                        <i class="bi bi-calculator"></i> Show Plate Calculator
+                    </button>
+                    <div id="plateCalculator" class="mt-2" style="display: none;">
+                        <div class="alert alert-info mb-0">
+                            <h6><i class="bi bi-disc"></i> Plate Calculator</h6>
+                            <div id="plateResults"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Notes (optional)</label>
+                    <input type="text" class="form-control" name="notes" placeholder="Felt great, struggled on last rep, etc.">
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-lg w-100 action-button">
+                    <i class="bi bi-check-lg"></i> Log Set & Start Rest
+                </button>
+            </form>
+        </div>
+        
+        <!-- Finish Exercise Button -->
+        <div class="mt-4 pt-3 border-top">
+            <button class="btn btn-success btn-lg w-100 action-button" onclick="finishExercise()">
+                <i class="bi bi-check-circle"></i> Finish This Exercise & Move to Next
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Exercise List (Collapsible) -->
+<div class="card">
+    <div class="card-header" data-bs-toggle="collapse" data-bs-target="#exerciseList" style="cursor: pointer;">
+        <h5 class="mb-0">
+            <i class="bi bi-list-ul"></i> All Exercises in This Workout
+            <i class="bi bi-chevron-down float-end"></i>
+        </h5>
+    </div>
+    <div id="exerciseList" class="collapse">
+        <div class="card-body">
+            <div class="list-group">
+                {% for ex in all_exercises %}
+                <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ forloop.counter }}. {{ ex.get_exercise_name }}</strong>
+                        <br>
+                        <small class="text-white-50">{{ ex.logged_sets.count }} sets logged</small>
+                    </div>
+                    <div>
+                        {% if ex.completed_at %}
+                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Done</span>
+                        {% elif ex == current_exercise %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-arrow-right-circle"></i> Current</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Pending</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let timerInterval = null;
+let timerSeconds = 0;
+const defaultRestTime = {{ settings.default_rest_time }};
+const currentExerciseId = {{ current_exercise.id }};
+
+function adjustWeight(amount) {
+    const input = document.getElementById('weightInput');
+    const currentValue = parseFloat(input.value) || 0;
+    input.value = Math.max(0, currentValue + amount);
+    
+    // Auto-update plate calculator if visible
+    const calc = document.getElementById('plateCalculator');
+    if (calc && calc.style.display !== 'none') {
+        calculatePlates();
+    }
+}
+
+function adjustReps(amount) {
+    const input = document.getElementById('repsInput');
+    const currentValue = parseInt(input.value) || 0;
+    input.value = Math.max(0, currentValue + amount);
+}
+
+function togglePlateCalculator() {
+    const calc = document.getElementById('plateCalculator');
+    if (calc.style.display === 'none') {
+        calc.style.display = 'block';
+        calculatePlates();
+    } else {
+        calc.style.display = 'none';
+    }
+}
+
+function calculatePlates() {
+    const weight = document.getElementById('weightInput').value;
+    fetch(`/api/plates/calculate/?weight=${weight}`)
+        .then(response => response.json())
+        .then(data => {
+            const resultsDiv = document.getElementById('plateResults');
+            if (data.error) {
+                resultsDiv.innerHTML = `<p class="text-danger mb-0">${data.error}</p>`;
+                return;
+            }
+            
+            let html = `<p class="mb-2"><strong>Bar:</strong> ${data.bar_weight} lbs | <strong>Per Side:</strong> ${data.weight_per_side.toFixed(1)} lbs</p>`;
+            
+            if (data.plates.length > 0) {
+                html += '<p class="mb-0"><strong>Plates per side:</strong> ';
+                data.plates.forEach(plate => {
+                    html += `<span class="plate-badge">${plate.count} × ${plate.weight} lbs</span>`;
+                });
+                html += '</p>';
+                
+                if (data.remainder > 0) {
+                    html += `<small class="text-warning">Note: ${data.remainder} lbs remainder</small>`;
+                }
+            } else {
+                html += '<p class="mb-0">Just the bar!</p>';
+            }
+            
+            resultsDiv.innerHTML = html;
+        });
+}
+
+function addSet(event) {
+    event.preventDefault();
+    const form = event.target;
+    const formData = new FormData(form);
+    
+    const setType = formData.get('set_type');
+    const data = {
+        weight: formData.get('weight'),
+        reps: formData.get('reps'),
+        is_warmup: setType === 'warmup',
+        is_dropset: setType === 'dropset',
+        notes: formData.get('notes') || ''
+    };
+    
+    fetch(`/api/set/add/${currentExerciseId}/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            // Hide form, show rest timer
+            document.getElementById('logSetCard').style.display = 'none';
+            document.getElementById('restTimerCard').style.display = 'block';
+            startTimer();
+        } else {
+            alert('Error adding set: ' + (result.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding set');
+    });
+}
+
+function deleteSet(setId) {
+    if (!confirm('Delete this set?')) return;
+    
+    fetch(`/api/set/${setId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Error deleting set');
+        }
+    });
+}
+
+function startTimer() {
+    timerSeconds = 0;
+    if (timerInterval) clearInterval(timerInterval);
+    
+    const timerDisplay = document.getElementById('timerDisplay');
+    timerDisplay.classList.add('timer-active');
+    
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        const minutes = Math.floor(timerSeconds / 60);
+        const seconds = timerSeconds % 60;
+        timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }, 1000);
+}
+
+function finishRest() {
+    stopTimer();
+    document.getElementById('restTimerCard').style.display = 'none';
+    document.getElementById('logSetCard').style.display = 'block';
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+    }
+    document.getElementById('timerDisplay').classList.remove('timer-active');
+}
+
+function resetTimer() {
+    stopTimer();
+    timerSeconds = 0;
+    document.getElementById('timerDisplay').textContent = '00:00';
+}
+
+function finishExercise() {
+    if (!confirm('Finish this exercise and move to the next one?')) return;
+    
+    fetch(`/api/exercise/${currentExerciseId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Error completing exercise');
+        }
+    });
+}
+</script>
+{% endblock %}

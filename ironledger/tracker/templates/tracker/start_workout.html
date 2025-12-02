@@ -2,9 +2,44 @@
 
 {% block title %}Start Workout{% endblock %}
 
+{% block extra_css %}
+<style>
+    .exercise-selector-item {
+        transition: all 0.2s ease;
+    }
+    
+    .selected-exercise-item {
+        background: rgba(255, 193, 7, 0.1);
+        border-left: 4px solid var(--iron-accent);
+        cursor: move;
+    }
+    
+    .selected-exercise-item:hover {
+        background: rgba(255, 193, 7, 0.2);
+    }
+    
+    .selected-exercise-item.dragging {
+        opacity: 0.5;
+    }
+    
+    .drag-handle {
+        cursor: move;
+        color: var(--iron-accent);
+    }
+    
+    .order-number {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: var(--iron-accent);
+        min-width: 30px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="card">
             <div class="card-header">
                 <h3 class="mb-0">
@@ -22,11 +57,16 @@
                             <span class="ms-3"><i class="bi bi-arrow-repeat"></i> Used {{ plan.times_used }} times</span>
                         </p>
                     </div>
+                {% else %}
+                    <div class="alert alert-warning">
+                        <h5><i class="bi bi-lightning-charge"></i> Quick Workout</h5>
+                        <p class="mb-0">Select exercises to include in your workout</p>
+                    </div>
                 {% endif %}
                 
                 <form method="post">
                     {% csrf_token %}
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="workout_name" class="form-label">Workout Name</label>
                         <input type="text" 
                                class="form-control" 
@@ -36,6 +76,57 @@
                                value="{% if plan %}{{ plan.name }} - {{ 'now'|date:'M d' }}{% endif %}">
                         <small class="form-text text-white-50">Give this workout session a name</small>
                     </div>
+                    
+                    {% if not plan %}
+                    <div class="mb-4">
+                        <label class="form-label">Select Exercises</label>
+                        <div class="row g-2">
+                            {% regroup global_exercises by primary_muscle_group as exercises_by_group %}
+                            {% for group in exercises_by_group %}
+                            <div class="col-12">
+                                <h6 class="text-white-50 mb-2">
+                                    <i class="bi bi-dot"></i> {{ group.grouper|title }}
+                                </h6>
+                                <div class="row g-2 ms-3">
+                                    {% for exercise in group.list %}
+                                    <div class="col-md-6">
+                                        <div class="form-check exercise-selector-item">
+                                            <input class="form-check-input exercise-checkbox" 
+                                                   type="checkbox" 
+                                                   name="exercises" 
+                                                   value="{{ exercise.id }}" 
+                                                   id="ex{{ exercise.id }}"
+                                                   data-name="{{ exercise.name }}"
+                                                   data-equipment="{{ exercise.get_equipment_type_display }}"
+                                                   onchange="updateSelectedExercises()">
+                                            <label class="form-check-label" for="ex{{ exercise.id }}">
+                                                {{ exercise.name }}
+                                                <small class="text-white-50">
+                                                    ({{ exercise.get_equipment_type_display }})
+                                                </small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <small class="form-text text-white-50">Select at least one exercise</small>
+                    </div>
+                    
+                    <!-- Selected Exercises Order -->
+                    <div id="selectedExercisesSection" class="mb-4" style="display: none;">
+                        <label class="form-label">
+                            <i class="bi bi-sort-down"></i> Exercise Order 
+                            <small class="text-white-50">(Drag to reorder)</small>
+                        </label>
+                        <div id="selectedExercisesList" class="list-group">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                        <input type="hidden" name="exercise_order" id="exerciseOrderInput">
+                    </div>
+                    {% endif %}
                     
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary btn-lg">
@@ -50,4 +141,138 @@
         </div>
     </div>
 </div>
+
+{% if not plan %}
+<script>
+let selectedExercises = [];
+let draggedElement = null;
+
+function updateSelectedExercises() {
+    const checkboxes = document.querySelectorAll('.exercise-checkbox:checked');
+    const section = document.getElementById('selectedExercisesSection');
+    const list = document.getElementById('selectedExercisesList');
+    
+    // Get currently selected exercise IDs
+    const currentSelection = Array.from(checkboxes).map(cb => ({
+        id: cb.value,
+        name: cb.dataset.name,
+        equipment: cb.dataset.equipment
+    }));
+    
+    if (currentSelection.length === 0) {
+        section.style.display = 'none';
+        selectedExercises = [];
+        return;
+    }
+    
+    // Update selectedExercises, preserving order for existing items
+    const newIds = currentSelection.map(ex => ex.id);
+    selectedExercises = selectedExercises.filter(ex => newIds.includes(ex.id));
+    
+    // Add newly selected exercises
+    currentSelection.forEach(ex => {
+        if (!selectedExercises.find(existing => existing.id === ex.id)) {
+            selectedExercises.push(ex);
+        }
+    });
+    
+    // Render the list
+    list.innerHTML = '';
+    selectedExercises.forEach((exercise, index) => {
+        const item = document.createElement('div');
+        item.className = 'list-group-item selected-exercise-item d-flex align-items-center justify-content-between';
+        item.draggable = true;
+        item.dataset.exerciseId = exercise.id;
+        
+        item.innerHTML = `
+            <div class="d-flex align-items-center">
+                <span class="drag-handle me-3">
+                    <i class="bi bi-grip-vertical"></i>
+                </span>
+                <span class="order-number">${index + 1}.</span>
+                <div class="ms-3">
+                    <strong class="text-warning">${exercise.name}</strong>
+                    <br>
+                    <small class="text-white-50">${exercise.equipment}</small>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExercise('${exercise.id}')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        `;
+        
+        // Drag events
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+        
+        list.appendChild(item);
+    });
+    
+    // Update hidden input with exercise order
+    document.getElementById('exerciseOrderInput').value = selectedExercises.map(ex => ex.id).join(',');
+    
+    section.style.display = 'block';
+}
+
+function removeExercise(exerciseId) {
+    // Uncheck the checkbox
+    const checkbox = document.querySelector(`input[value="${exerciseId}"]`);
+    if (checkbox) {
+        checkbox.checked = false;
+    }
+    updateSelectedExercises();
+}
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    
+    const draggingItem = document.querySelector('.dragging');
+    const siblings = [...this.parentElement.querySelectorAll('.selected-exercise-item:not(.dragging)')];
+    const nextSibling = siblings.find(sibling => {
+        const box = sibling.getBoundingClientRect();
+        const offset = e.clientY - box.top - box.height / 2;
+        return offset < 0;
+    });
+    
+    this.parentElement.insertBefore(draggingItem, nextSibling);
+    
+    return false;
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    // Rebuild selectedExercises array based on new DOM order
+    const items = document.querySelectorAll('.selected-exercise-item');
+    const newOrder = Array.from(items).map(item => {
+        const exerciseId = item.dataset.exerciseId;
+        return selectedExercises.find(ex => ex.id === exerciseId);
+    });
+    
+    selectedExercises = newOrder;
+    updateSelectedExercises();
+    
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+}
+</script>
+{% endif %}
+
 {% endblock %}

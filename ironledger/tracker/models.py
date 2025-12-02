@@ -244,6 +244,10 @@ class SessionExercise(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
     
+    # Rest time between exercises (in seconds)
+    rest_before_duration = models.PositiveIntegerField(null=True, blank=True, 
+                                                       help_text="Rest time in seconds before starting this exercise")
+    
     class Meta:
         ordering = ['logged_workout', 'order']
         verbose_name = "Session Exercise"

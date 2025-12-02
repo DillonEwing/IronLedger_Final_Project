@@ -136,6 +136,8 @@ def start_workout(request, plan_id=None):
     
     if request.method == 'POST':
         workout_name = request.POST.get('workout_name', '')
+        selected_exercises = request.POST.getlist('exercises')  # For quick workout
+        exercise_order = request.POST.get('exercise_order', '')  # Ordered list from drag-and-drop
         
         # Create the logged workout
         workout = LoggedWorkout.objects.create(
@@ -158,19 +160,45 @@ def start_workout(request, plan_id=None):
                 )
             # Increment plan usage
             plan.increment_usage()
+        elif exercise_order:
+            # Use the custom order from drag-and-drop
+            exercise_ids = exercise_order.split(',')
+            for idx, exercise_id in enumerate(exercise_ids, 1):
+                try:
+                    global_exercise = GlobalExercise.objects.get(id=exercise_id)
+                    SessionExercise.objects.create(
+                        logged_workout=workout,
+                        global_exercise=global_exercise,
+                        order=idx
+                    )
+                except GlobalExercise.DoesNotExist:
+                    continue
+        elif selected_exercises:
+            # Fallback: Quick workout - add selected global exercises (original order)
+            for idx, exercise_id in enumerate(selected_exercises, 1):
+                global_exercise = GlobalExercise.objects.get(id=exercise_id)
+                SessionExercise.objects.create(
+                    logged_workout=workout,
+                    global_exercise=global_exercise,
+                    order=idx
+                )
         
         messages.success(request, f'Workout started: {workout.name}')
         return redirect('active_workout', workout_id=workout.id)
     
+    # Get all global exercises for quick workout selection
+    global_exercises = GlobalExercise.objects.filter(is_active=True).order_by('primary_muscle_group', 'name')
+    
     context = {
         'plan': plan,
+        'global_exercises': global_exercises,
     }
     return render(request, 'tracker/start_workout.html', context)
 
 
 @login_required
 def active_workout(request, workout_id):
-    """Active workout session - main logging interface"""
+    """Active workout session - main logging interface (one exercise at a time)"""
     workout = get_object_or_404(LoggedWorkout, id=workout_id, user=request.user)
     
     # Get user settings for plate calculator
@@ -179,27 +207,46 @@ def active_workout(request, workout_id):
     # Get all exercises in this workout
     session_exercises = workout.session_exercises.all().order_by('order')
     
-    # Build exercise data with sets
-    exercises_data = []
-    for session_ex in session_exercises:
-        sets = session_ex.logged_sets.all().order_by('set_number')
-        exercise_name = session_ex.get_exercise_name()
-        
-        # Get exercise details for weight increment type
-        exercise_obj = session_ex.global_exercise or session_ex.custom_exercise
-        
-        exercises_data.append({
-            'session_exercise': session_ex,
-            'exercise_name': exercise_name,
-            'exercise_obj': exercise_obj,
-            'sets': sets,
-            'set_count': sets.count(),
-        })
+    if not session_exercises.exists():
+        messages.warning(request, 'No exercises in this workout. Add some exercises to get started!')
+        return redirect('end_workout', workout_id=workout.id)
+    
+    # Determine current exercise (first one without completed_at, or first if all completed)
+    current_exercise = session_exercises.filter(completed_at__isnull=True).first()
+    if not current_exercise:
+        # All exercises completed
+        current_exercise = session_exercises.first()
+        all_completed = True
+    else:
+        all_completed = False
+        # Set started_at if this is the first time viewing this exercise
+        if not current_exercise.started_at:
+            current_exercise.started_at = timezone.now()
+            # DON'T set rest_before_duration here - it will be set when first set is logged
+            current_exercise.save(update_fields=['started_at'])
+            print(f"DEBUG: Started exercise {current_exercise.id} at {current_exercise.started_at} - rest will be calculated when first set is logged")
+
+    
+    # Get sets for current exercise
+    current_sets = current_exercise.logged_sets.all().order_by('set_number') if current_exercise else []
+    
+    # Get exercise details for weight increment type
+    exercise_obj = current_exercise.global_exercise or current_exercise.custom_exercise if current_exercise else None
+    
+    # Calculate progress
+    completed_exercises = session_exercises.filter(completed_at__isnull=False).count()
+    total_exercises = session_exercises.count()
     
     context = {
         'workout': workout,
-        'exercises_data': exercises_data,
+        'current_exercise': current_exercise,
+        'exercise_obj': exercise_obj,
+        'current_sets': current_sets,
         'settings': settings,
+        'all_exercises': session_exercises,
+        'completed_exercises': completed_exercises,
+        'total_exercises': total_exercises,
+        'all_completed': all_completed,
     }
     return render(request, 'tracker/active_workout.html', context)
 
@@ -227,16 +274,28 @@ def add_set(request, session_exercise_id):
         is_warmup = data.get('is_warmup', False)
         is_dropset = data.get('is_dropset', False)
         notes = data.get('notes', '')
+        # Accept rest_duration from frontend if provided (from actual timer)
+        rest_duration_from_client = data.get('rest_duration', None)
         
         # Get the next set number
         last_set = session_exercise.logged_sets.order_by('-set_number').first()
         set_number = (last_set.set_number + 1) if last_set else 1
         
-        # Calculate rest duration if there was a previous set
-        if last_set and last_set.completed_at:
-            rest_duration = int((timezone.now() - last_set.completed_at).total_seconds())
+        # For first set, handle rest_before_duration
+        if set_number == 1 and session_exercise.rest_before_duration is None:
+            # If client provided rest duration, use it (from timer between exercises)
+            if rest_duration_from_client is not None:
+                session_exercise.rest_before_duration = rest_duration_from_client
+                session_exercise.save(update_fields=['rest_before_duration'])
+                print(f"DEBUG: First set - using rest duration from client timer: {rest_duration_from_client}s")
+        
+        # Use rest duration from client (actual timer) if provided
+        rest_duration = rest_duration_from_client
+        
+        if rest_duration is not None:
+            print(f"DEBUG: Using rest duration from client: {rest_duration}s")
         else:
-            rest_duration = None
+            print(f"DEBUG: No rest duration - first set of workout or timer not used")
         
         # Create the set
         logged_set = LoggedSet.objects.create(
@@ -295,6 +354,83 @@ def update_set(request, set_id):
     
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+def complete_exercise(request, session_exercise_id):
+    """Mark an exercise as complete and move to next (AJAX endpoint)"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=400)
+    
+    session_exercise = get_object_or_404(SessionExercise, id=session_exercise_id)
+    
+    # Verify ownership
+    if session_exercise.logged_workout.user != request.user:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    # Mark as completed
+    session_exercise.completed_at = timezone.now()
+    session_exercise.save()
+    
+    return JsonResponse({'success': True})
+
+
+@login_required
+def select_next_exercise(request, session_exercise_id, next_exercise_id):
+    """Complete current exercise and reorder to make selected exercise next (AJAX endpoint)"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=400)
+    
+    session_exercise = get_object_or_404(SessionExercise, id=session_exercise_id)
+    next_exercise = get_object_or_404(SessionExercise, id=next_exercise_id)
+    
+    # Verify ownership
+    if session_exercise.logged_workout.user != request.user:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    if next_exercise.logged_workout.user != request.user:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    # Verify both exercises are in the same workout
+    if session_exercise.logged_workout_id != next_exercise.logged_workout_id:
+        return JsonResponse({'error': 'Exercises must be in same workout'}, status=400)
+    
+    # Mark current exercise as completed
+    current_completion_time = timezone.now()
+    session_exercise.completed_at = current_completion_time
+    session_exercise.save()
+    print(f"DEBUG: Completed exercise {session_exercise.id} at {current_completion_time}")
+    
+    # Reorder: Make the selected exercise the next one
+    # Get all incomplete exercises
+    incomplete_exercises = SessionExercise.objects.filter(
+        logged_workout=session_exercise.logged_workout,
+        completed_at__isnull=True
+    ).order_by('order')
+    
+    # Reorder so selected exercise is first
+    current_order = 1
+    for ex in incomplete_exercises:
+        if ex.id == next_exercise_id:
+            # Selected exercise gets order 1
+            ex.order = 0  # Temporarily set to 0 to avoid conflicts
+            ex.save()
+        else:
+            ex.order = current_order
+            ex.save()
+            current_order += 1
+    
+    # Now update the selected exercise to order 1
+    next_exercise.order = 1
+    next_exercise.save()
+    
+    # Renumber remaining to start from 2
+    other_exercises = incomplete_exercises.exclude(id=next_exercise_id).order_by('order')
+    for idx, ex in enumerate(other_exercises, 2):
+        ex.order = idx
+        ex.save()
+    
+    return JsonResponse({'success': True})
 
 
 @login_required
