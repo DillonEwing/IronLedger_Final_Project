@@ -9,6 +9,9 @@ pip install -r requirements.txt
 echo "Changing to ironledger directory..."
 pushd ironledger
 
+echo "Creating staticfiles directory..."
+mkdir -p staticfiles
+
 echo "Collecting static files..."
 python manage.py collectstatic --no-input --clear
 
