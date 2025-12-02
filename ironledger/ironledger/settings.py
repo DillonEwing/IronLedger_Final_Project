@@ -27,6 +27,28 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-t%^*pu_72hr4tq=h63qit
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
+# For better error visibility
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
+
 # Handle ALLOWED_HOSTS
 allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', '*')
 if allowed_hosts_str == '*':
@@ -127,7 +149,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Use the modern STORAGES setting instead of deprecated STATICFILES_STORAGE
+# WhiteNoise configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True if DEBUG else False
+
+# Use the modern STORAGES setting
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
