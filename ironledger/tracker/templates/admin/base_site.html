@@ -24,7 +24,7 @@
     
     /* Header styling */
     #header {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+        background: linear-gradient(135deg, #2a2d3a 0%, #1a1a2e 100%) !important;
         border-bottom: 3px solid #ffc107;
     }
     
@@ -39,8 +39,9 @@
     
     /* Breadcrumbs */
     div.breadcrumbs {
-        background: #0f3460 !important;
+        background: #3a3a52 !important;
         color: #ffffff;
+        border-bottom: 2px solid #ffc107;
     }
     
     div.breadcrumbs a {
@@ -49,92 +50,139 @@
     
     div.breadcrumbs a:hover {
         color: #ffffff !important;
+        text-decoration: underline;
     }
     
-    /* Module headers */
+    /* Module headers - cleaner gray instead of pink */
     .module h2, 
     .module caption, 
     .inline-group h2 {
-        background: #e94560 !important;
-        color: #ffffff !important;
+        background: linear-gradient(135deg, #4a5568 0%, #3a4555 100%) !important;
+        color: #ffc107 !important;
+        font-weight: 600 !important;
+        border-left: 4px solid #ffc107 !important;
     }
     
-    /* Links */
+    /* Links - yellow instead of pink */
     a:link, 
     a:visited {
-        color: #e94560 !important;
+        color: #2a5a9e !important;
     }
     
     a:hover {
         color: #ffc107 !important;
+        text-decoration: underline;
     }
     
-    /* Buttons */
+    /* Buttons - yellow/gold theme */
     .button, 
     input[type=submit], 
     input[type=button], 
     .submit-row input,
-    button {
-        background: #e94560 !important;
-        border-color: #e94560 !important;
+    button,
+    .object-tools a {
+        background: linear-gradient(135deg, #ffc107 0%, #e6ad06 100%) !important;
+        border: 1px solid #e6ad06 !important;
+        color: #1a1a2e !important;
+        font-weight: 600 !important;
+        border-radius: 4px !important;
+        padding: 8px 16px !important;
+        transition: all 0.3s ease !important;
     }
     
     .button:hover,
     input[type=submit]:hover,
     input[type=button]:hover,
     .submit-row input:hover,
-    button:hover {
-        background: #d63850 !important;
-        border-color: #d63850 !important;
+    button:hover,
+    .object-tools a:hover {
+        background: linear-gradient(135deg, #e6ad06 0%, #d09906 100%) !important;
+        border-color: #d09906 !important;
+        color: #000000 !important;
+        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3) !important;
     }
     
-    /* Default button */
+    /* Delete/Danger buttons - keep subtle red */
+    .deletelink,
+    .deletelink-box a {
+        background: #c74444 !important;
+        border-color: #c74444 !important;
+        color: #ffffff !important;
+    }
+    
+    .deletelink:hover,
+    .deletelink-box a:hover {
+        background: #b03838 !important;
+        border-color: #b03838 !important;
+    }
+    
+    /* Default/Primary button - darker for contrast */
     .default {
-        background: #ffc107 !important;
-        border-color: #ffc107 !important;
-        color: #000000 !important;
+        background: linear-gradient(135deg, #2a5a9e 0%, #1e4578 100%) !important;
+        border-color: #1e4578 !important;
+        color: #ffffff !important;
     }
     
     .default:hover {
-        background: #e6ad06 !important;
-        border-color: #e6ad06 !important;
+        background: linear-gradient(135deg, #1e4578 0%, #16335a 100%) !important;
+        border-color: #16335a !important;
+        box-shadow: 0 2px 8px rgba(42, 90, 158, 0.3) !important;
     }
     
     /* Selected items */
     .selected {
-        background-color: #0f3460 !important;
-        color: #ffffff !important;
+        background-color: #3a4555 !important;
+        color: #ffc107 !important;
+    }
+    
+    /* Table row hover */
+    tbody tr:hover {
+        background-color: #f8f9fa !important;
     }
     
     /* Calendar widget */
     .calendarbox h2 {
-        background: #e94560 !important;
+        background: linear-gradient(135deg, #4a5568 0%, #3a4555 100%) !important;
+        color: #ffc107 !important;
     }
     
-    .calendar td a:hover {
+    .calendar td a:hover,
+    .calendar td.selected a {
         background: #ffc107 !important;
-        color: #000000 !important;
-    }
-    
-    /* Delete confirmation */
-    .deletelink-box {
-        border-color: #e94560 !important;
-    }
-    
-    /* Object tools */
-    .object-tools a {
-        background: #e94560 !important;
-        border-color: #e94560 !important;
-    }
-    
-    .object-tools a:hover {
-        background: #d63850 !important;
-        border-color: #d63850 !important;
+        color: #1a1a2e !important;
+        font-weight: bold !important;
     }
     
     /* Sortable headers */
     thead th.sortable a {
+        color: #2a5a9e !important;
+    }
+    
+    thead th.sortable a:hover {
         color: #ffc107 !important;
+    }
+    
+    /* Action row at bottom */
+    .submit-row {
+        background: #f8f9fa !important;
+        border-top: 2px solid #e0e0e0 !important;
+        padding: 12px !important;
+    }
+    
+    /* Dashboard modules */
+    #content-main .module {
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 6px !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    }
+    
+    /* Dashboard links */
+    .app-tracker .model-exercise a,
+    .app-tracker .model-workoutplan a,
+    .app-tracker .model-loggedworkout a {
+        color: #2a5a9e !important;
+        font-weight: 500 !important;
     }
     
     /* Footer branding */
@@ -143,11 +191,29 @@
         font-size: 11px;
         text-align: center;
         padding: 20px;
+        background: #f8f9fa;
+        border-top: 1px solid #e0e0e0;
     }
     
     /* Hide the theme toggle */
     #theme-toggle {
         display: none !important;
+    }
+    
+    /* Change list filters */
+    #changelist-filter {
+        background: #f8f9fa !important;
+        border-left: 2px solid #ffc107 !important;
+    }
+    
+    #changelist-filter h2 {
+        background: #3a4555 !important;
+        color: #ffc107 !important;
+    }
+    
+    #changelist-filter a:hover {
+        background: #ffc107 !important;
+        color: #1a1a2e !important;
     }
 </style>
 {% endblock %}
