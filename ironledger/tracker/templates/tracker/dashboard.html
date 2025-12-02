@@ -11,59 +11,107 @@
     </div>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-3">
-        <div class="card text-center p-4">
-            <i class="bi bi-calendar-week display-4 text-primary mb-3"></i>
-            <h3 class="h5">0</h3>
-            <p class="text-white-50 mb-0">Workouts This Week</p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center p-4">
-            <i class="bi bi-trophy display-4 text-warning mb-3"></i>
-            <h3 class="h5">0</h3>
-            <p class="text-white-50 mb-0">Personal Records</p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center p-4">
-            <i class="bi bi-graph-up display-4 text-success mb-3"></i>
-            <h3 class="h5">0</h3>
-            <p class="text-white-50 mb-0">Total Exercises</p>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-center p-4">
-            <i class="bi bi-fire display-4 text-danger mb-3"></i>
-            <h3 class="h5">0</h3>
-            <p class="text-white-50 mb-0">Day Streak</p>
+{% if active_workout %}
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-play-circle-fill"></i>
+    <strong>Workout in Progress!</strong> 
+    You have an active workout: <strong>{{ active_workout.name }}</strong>
+    <a href="{% url 'active_workout' active_workout.id %}" class="alert-link ms-2">Continue Workout →</a>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endif %}
+
+<div class="row g-4 mb-4">
+    <div class="col-12">
+        <div class="card bg-gradient" style="background: linear-gradient(135deg, var(--iron-primary) 0%, var(--iron-accent) 100%);">
+            <div class="card-body text-center py-5">
+                <h2 class="mb-3">
+                    <i class="bi bi-lightning-charge-fill"></i> Ready to Train?
+                </h2>
+                <p class="lead mb-4">Choose a workout plan or start from scratch</p>
+                <div class="btn-group" role="group">
+                    <a href="{% url 'workout_plans_list' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-list-check"></i> Browse Plans
+                    </a>
+                    <a href="{% url 'start_workout' %}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-plus-circle"></i> Quick Start
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-5">
-    <div class="col-lg-8">
-        <div class="card">
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-clock-history"></i> Recent Workouts
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-bookmark-star"></i> Your Workout Plans
                 </h5>
-                <p class="text-white-50">No workouts logged yet. Start tracking your progress!</p>
-                <a href="#" class="btn btn-primary">
-                    <i class="bi bi-plus-circle"></i> Log Workout
-                </a>
+                {% if workout_plans %}
+                    <div class="list-group list-group-flush">
+                        {% for plan in workout_plans|slice:":5" %}
+                        <div class="list-group-item bg-transparent border-secondary d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ plan.name }}</h6>
+                                <small class="text-white-50">
+                                    <i class="bi bi-collection"></i> {{ plan.planned_exercises.count }} exercises
+                                    <span class="ms-2"><i class="bi bi-arrow-repeat"></i> Used {{ plan.times_used }} times</span>
+                                </small>
+                            </div>
+                            <a href="{% url 'start_workout_from_plan' plan.id %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-play-fill"></i> Start
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <a href="{% url 'workout_plans_list' %}" class="btn btn-outline-light btn-sm mt-3">
+                        View All Plans →
+                    </a>
+                {% else %}
+                    <p class="text-white-50">No workout plans yet. Browse shared plans to get started!</p>
+                    <a href="{% url 'workout_plans_list' %}" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-search"></i> Browse Plans
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
-        <div class="card">
+    
+    <div class="col-md-6">
+        <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">
-                    <i class="bi bi-graph-up-arrow"></i> Progress
+                <h5 class="card-title mb-4">
+                    <i class="bi bi-clock-history"></i> Recent Workouts
                 </h5>
-                <p class="text-white-50">Track your strength gains over time with detailed analytics.</p>
-                <a href="#" class="btn btn-outline-light btn-sm">View Analytics</a>
+                {% if recent_workouts %}
+                    <div class="list-group list-group-flush">
+                        {% for workout in recent_workouts %}
+                        <div class="list-group-item bg-transparent border-secondary">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">{{ workout.name }}</h6>
+                                    <small class="text-white-50">
+                                        <i class="bi bi-calendar3"></i> {{ workout.started_at|date:"M d, Y" }}
+                                        {% if workout.duration %}
+                                        <span class="ms-2"><i class="bi bi-clock"></i> {{ workout.duration }}</span>
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <a href="{% url 'workout_detail' workout.id %}" class="btn btn-sm btn-outline-light">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-white-50">No workouts logged yet. Start tracking your progress!</p>
+                    <a href="{% url 'start_workout' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Log First Workout
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>

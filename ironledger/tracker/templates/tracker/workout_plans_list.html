@@ -1,0 +1,102 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Workout Plans{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="mb-3">
+            <i class="bi bi-bookmark-star"></i> Workout Plans
+        </h1>
+    </div>
+</div>
+
+{% if user_plans %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h3 class="mb-3"><i class="bi bi-person-circle"></i> Your Plans</h3>
+        <div class="row g-3">
+            {% for plan in user_plans %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ plan.name }}</h5>
+                        <p class="card-text text-white-50">{{ plan.description|truncatewords:15 }}</p>
+                        <div class="mb-3">
+                            {% if plan.tags %}
+                                {% for tag in plan.tags.split:',' %}
+                                <span class="badge bg-secondary">{{ tag }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-white-50">
+                                <i class="bi bi-collection"></i> {{ plan.planned_exercises.count }} exercises<br>
+                                <i class="bi bi-arrow-repeat"></i> Used {{ plan.times_used }} times
+                            </small>
+                            <a href="{% url 'start_workout_from_plan' plan.id %}" class="btn btn-primary">
+                                <i class="bi bi-play-fill"></i> Start
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if shared_plans %}
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3"><i class="bi bi-people-fill"></i> Shared Plans</h3>
+        <div class="row g-3">
+            {% for plan in shared_plans %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title">{{ plan.name }}</h5>
+                            <span class="badge bg-info">Shared</span>
+                        </div>
+                        <p class="card-text text-white-50">{{ plan.description|truncatewords:15 }}</p>
+                        <div class="mb-3">
+                            {% if plan.tags %}
+                                {% for tag in plan.tags.split:',' %}
+                                <span class="badge bg-secondary">{{ tag }}</span>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-white-50">
+                                <i class="bi bi-collection"></i> {{ plan.planned_exercises.count }} exercises<br>
+                                <i class="bi bi-arrow-repeat"></i> Used {{ plan.times_used }} times
+                            </small>
+                            <a href="{% url 'start_workout_from_plan' plan.id %}" class="btn btn-primary">
+                                <i class="bi bi-play-fill"></i> Start
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if not user_plans and not shared_plans %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i> No workout plans available yet.
+</div>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

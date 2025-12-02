@@ -1,0 +1,53 @@
+{% extends 'tracker/base.html' %}
+
+{% block title %}Start Workout{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">
+                    <i class="bi bi-play-circle"></i> Start New Workout
+                </h3>
+            </div>
+            <div class="card-body">
+                {% if plan %}
+                    <div class="alert alert-info">
+                        <h5><i class="bi bi-bookmark-star"></i> {{ plan.name }}</h5>
+                        <p class="mb-0">{{ plan.description }}</p>
+                        <hr>
+                        <p class="mb-0">
+                            <i class="bi bi-collection"></i> {{ plan.planned_exercises.count }} exercises
+                            <span class="ms-3"><i class="bi bi-arrow-repeat"></i> Used {{ plan.times_used }} times</span>
+                        </p>
+                    </div>
+                {% endif %}
+                
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="workout_name" class="form-label">Workout Name</label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="workout_name" 
+                               name="workout_name" 
+                               placeholder="{% if plan %}{{ plan.name }} - {{ 'now'|date:'M d' }}{% else %}Quick Workout{% endif %}"
+                               value="{% if plan %}{{ plan.name }} - {{ 'now'|date:'M d' }}{% endif %}">
+                        <small class="form-text text-white-50">Give this workout session a name</small>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-lightning-charge-fill"></i> Start Workout
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-light">
+                            <i class="bi bi-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
