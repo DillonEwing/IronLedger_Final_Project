@@ -14,7 +14,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: ALLOWED_HOSTS
-        value: ironledger-final-project.onrender.com  # UPDATE THIS with your actual Render URL
+        value: "*"
       - key: DATABASE_URL
         fromDatabase:
           name: ironledger-db
