@@ -25,7 +25,7 @@
                         <p class="card-text text-white-50">{{ plan.description|truncatewords:15 }}</p>
                         <div class="mb-3">
                             {% if plan.tags %}
-                                {% for tag in plan.tags.split:',' %}
+                                {% for tag in plan.tags|split:"," %}
                                 <span class="badge bg-secondary">{{ tag }}</span>
                                 {% endfor %}
                             {% endif %}
@@ -64,7 +64,7 @@
                         <p class="card-text text-white-50">{{ plan.description|truncatewords:15 }}</p>
                         <div class="mb-3">
                             {% if plan.tags %}
-                                {% for tag in plan.tags.split:',' %}
+                                {% for tag in plan.tags|split:"," %}
                                 <span class="badge bg-secondary">{{ tag }}</span>
                                 {% endfor %}
                             {% endif %}
