@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free  # Free tier
     buildCommand: "./build.sh"
-    startCommand: "cd ironledger && gunicorn ironledger.wsgi:application"
+    startCommand: "gunicorn --chdir ironledger --bind 0.0.0.0:$PORT ironledger.wsgi:application"
     healthCheckPath: /  # Optional: Render will ping this to check if app is running
     autoDeploy: true  # Auto-deploy when you push to main branch
     envVars:
