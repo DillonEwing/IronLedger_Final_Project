@@ -1,1 +1,1 @@
-web: cd ironledger && gunicorn ironledger.wsgi:application
+web: gunicorn --pythonpath ironledger ironledger.wsgi:application
