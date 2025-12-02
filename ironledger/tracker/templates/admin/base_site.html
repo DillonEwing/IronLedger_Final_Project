@@ -1,11 +1,154 @@
 {% extends "admin/base.html" %}
 
+{% block title %}{{ title }} | IronLedger Admin{% endblock %}
+
+{% block branding %}
+<div id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <h1 style="margin: 0; font-size: 24px; font-weight: bold;">
+            <span style="font-size: 28px;">🏋️</span> IronLedger Admin Portal
+        </h1>
+    </a>
+</div>
+<div style="color: #ffc107; font-size: 12px; margin-top: 5px; font-style: italic;">
+    Track Your Strength Journey
+</div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
 <style>
+    /* Custom IronLedger Admin Theme */
+    
+    /* Header styling */
+    #header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%) !important;
+        border-bottom: 3px solid #ffc107;
+    }
+    
+    #site-name a {
+        color: #ffc107 !important;
+        text-decoration: none;
+    }
+    
+    #site-name a:hover {
+        color: #ffffff !important;
+    }
+    
+    /* Breadcrumbs */
+    div.breadcrumbs {
+        background: #0f3460 !important;
+        color: #ffffff;
+    }
+    
+    div.breadcrumbs a {
+        color: #ffc107 !important;
+    }
+    
+    div.breadcrumbs a:hover {
+        color: #ffffff !important;
+    }
+    
+    /* Module headers */
+    .module h2, 
+    .module caption, 
+    .inline-group h2 {
+        background: #e94560 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Links */
+    a:link, 
+    a:visited {
+        color: #e94560 !important;
+    }
+    
+    a:hover {
+        color: #ffc107 !important;
+    }
+    
+    /* Buttons */
+    .button, 
+    input[type=submit], 
+    input[type=button], 
+    .submit-row input,
+    button {
+        background: #e94560 !important;
+        border-color: #e94560 !important;
+    }
+    
+    .button:hover,
+    input[type=submit]:hover,
+    input[type=button]:hover,
+    .submit-row input:hover,
+    button:hover {
+        background: #d63850 !important;
+        border-color: #d63850 !important;
+    }
+    
+    /* Default button */
+    .default {
+        background: #ffc107 !important;
+        border-color: #ffc107 !important;
+        color: #000000 !important;
+    }
+    
+    .default:hover {
+        background: #e6ad06 !important;
+        border-color: #e6ad06 !important;
+    }
+    
+    /* Selected items */
+    .selected {
+        background-color: #0f3460 !important;
+        color: #ffffff !important;
+    }
+    
+    /* Calendar widget */
+    .calendarbox h2 {
+        background: #e94560 !important;
+    }
+    
+    .calendar td a:hover {
+        background: #ffc107 !important;
+        color: #000000 !important;
+    }
+    
+    /* Delete confirmation */
+    .deletelink-box {
+        border-color: #e94560 !important;
+    }
+    
+    /* Object tools */
+    .object-tools a {
+        background: #e94560 !important;
+        border-color: #e94560 !important;
+    }
+    
+    .object-tools a:hover {
+        background: #d63850 !important;
+        border-color: #d63850 !important;
+    }
+    
+    /* Sortable headers */
+    thead th.sortable a {
+        color: #ffc107 !important;
+    }
+    
+    /* Footer branding */
+    #footer {
+        color: #666;
+        font-size: 11px;
+        text-align: center;
+        padding: 20px;
+    }
+    
     /* Hide the theme toggle */
     #theme-toggle {
         display: none !important;
     }
 </style>
 {% endblock %}
+

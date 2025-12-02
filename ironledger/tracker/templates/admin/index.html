@@ -1,0 +1,37 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 30px; border-radius: 10px; margin-bottom: 30px; color: white; border: 2px solid #ffc107;">
+    <h2 style="color: #ffc107; margin-top: 0;">
+        <span style="font-size: 32px;">💪</span> Welcome to IronLedger Admin
+    </h2>
+    <p style="font-size: 16px; margin-bottom: 15px;">
+        Manage your workout tracking application from this central dashboard.
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 20px;">
+        <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="font-size: 24px; margin-bottom: 5px;">🏋️</div>
+            <div style="font-weight: bold;">Exercises</div>
+            <div style="font-size: 12px; opacity: 0.8;">Manage global & custom exercises</div>
+        </div>
+        <div style="background: rgba(233, 69, 96, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #e94560;">
+            <div style="font-size: 24px; margin-bottom: 5px;">📋</div>
+            <div style="font-weight: bold;">Workout Plans</div>
+            <div style="font-size: 12px; opacity: 0.8;">Create & edit workout routines</div>
+        </div>
+        <div style="background: rgba(15, 52, 96, 0.3); padding: 15px; border-radius: 8px; border-left: 4px solid #0f3460;">
+            <div style="font-size: 24px; margin-bottom: 5px;">📊</div>
+            <div style="font-weight: bold;">Logged Workouts</div>
+            <div style="font-size: 12px; opacity: 0.8;">View workout session data</div>
+        </div>
+        <div style="background: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107;">
+            <div style="font-size: 24px; margin-bottom: 5px;">👥</div>
+            <div style="font-weight: bold;">Users</div>
+            <div style="font-size: 12px; opacity: 0.8;">Manage user accounts</div>
+        </div>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}

@@ -1,0 +1,244 @@
+{% extends "admin/login.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    /* Custom IronLedger Login Theme */
+    
+    body {
+        background: linear-gradient(135deg, #3a3a52 0%, #2a2d3a 100%) !important;
+        min-height: 100vh !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow-x: hidden !important;
+    }
+    
+    #container {
+        min-height: 100vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        padding: 10px 3% !important;
+        margin: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        background: transparent !important;
+    }
+    
+    #header {
+        background: transparent !important;
+        border-bottom: none !important;
+        padding: 0 0 15px 0 !important;
+        width: 100% !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+    }
+    
+    #branding {
+        text-align: center !important;
+    }
+    
+    #branding h1 {
+        color: #ffc107 !important;
+        font-size: 36px !important;
+        text-align: center !important;
+        margin: 0 !important;
+        font-weight: bold !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    #branding h1::before {
+        content: "🏋️ ";
+        font-size: 40px;
+    }
+    
+    .login-tagline {
+        color: #ffffff !important;
+        font-size: 14px !important;
+        margin-top: 8px !important;
+        font-style: italic !important;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    /* Login container */
+    #content {
+        padding: 0 !important;
+        flex: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: transparent !important;
+        width: 100% !important;
+    }
+    
+    #content-main {
+        width: 85% !important;
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        padding: 30px 8% !important;
+        border-radius: 20px !important;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4) !important;
+        border-top: 6px solid #ffc107 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Form styling */
+    form {
+        margin: 0 !important;
+        max-width: 800px !important;
+        margin: 0 auto !important;
+    }
+    
+    .form-row {
+        margin-bottom: 15px !important;
+        padding: 0 !important;
+    }
+    
+    .form-row label {
+        color: #1a1a2e !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        display: block !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .form-row input[type="text"],
+    .form-row input[type="password"] {
+        width: 100% !important;
+        padding: 12px 16px !important;
+        border: 2px solid #ddd !important;
+        border-radius: 10px !important;
+        font-size: 15px !important;
+        transition: all 0.3s ease !important;
+        box-sizing: border-box !important;
+        background: #ffffff !important;
+        color: #1a1a2e !important;
+    }
+    
+    .form-row input[type="text"]:focus,
+    .form-row input[type="password"]:focus {
+        border-color: #ffc107 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 4px rgba(255, 193, 7, 0.15) !important;
+    }
+    
+    /* Submit button */
+    .submit-row {
+        text-align: center !important;
+        padding: 20px 0 0 0 !important;
+        border-top: 2px solid #e0e0e0 !important;
+        margin-top: 20px !important;
+    }
+    
+    .submit-row input[type="submit"] {
+        background: linear-gradient(135deg, #e94560 0%, #d63850 100%) !important;
+        border: none !important;
+        padding: 12px 45px !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        border-radius: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.5px !important;
+        color: white !important;
+    }
+    
+    .submit-row input[type="submit"]:hover {
+        background: linear-gradient(135deg, #d63850 0%, #c42a42 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(233, 69, 96, 0.4) !important;
+    }
+    
+    .submit-row input[type="submit"]:active {
+        transform: translateY(0) !important;
+    }
+    
+    /* Error messages */
+    .errornote {
+        background: #e94560 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 16px 20px !important;
+        margin-bottom: 25px !important;
+        font-weight: 600 !important;
+    }
+    
+    .errorlist {
+        background: #ffe0e6 !important;
+        color: #e94560 !important;
+        border-left: 5px solid #e94560 !important;
+        padding: 12px 18px !important;
+        margin: 12px 0 !important;
+        border-radius: 6px !important;
+        list-style: none !important;
+    }
+    
+    .errorlist li {
+        font-weight: 600 !important;
+    }
+    
+    /* Footer */
+    #footer {
+        background: transparent !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        text-align: center !important;
+        padding: 15px 20px 10px 20px !important;
+        font-size: 12px !important;
+    }
+    
+    /* Password reset link */
+    .password-reset-link {
+        text-align: center !important;
+        margin-top: 25px !important;
+    }
+    
+    .password-reset-link a {
+        color: #e94560 !important;
+        text-decoration: none !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+    }
+    
+    .password-reset-link a:hover {
+        color: #ffc107 !important;
+        text-decoration: underline !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        #content-main {
+            max-width: 500px !important;
+            padding: 40px 30px !important;
+        }
+        
+        #branding h1 {
+            font-size: 36px !important;
+        }
+        
+        #branding h1::before {
+            font-size: 42px !important;
+        }
+        
+        .form-row input[type="text"],
+        .form-row input[type="password"] {
+            padding: 14px 16px !important;
+            font-size: 16px !important;
+        }
+        
+        .form-row label {
+            font-size: 15px !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="branding">
+    <h1>IronLedger</h1>
+    <div class="login-tagline">Track Your Strength Journey</div>
+</div>
+{% endblock %}

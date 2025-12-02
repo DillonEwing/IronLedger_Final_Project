@@ -60,13 +60,13 @@ else:
 # Application definition
 
 INSTALLED_APPS = [
+    'tracker',  # Must be before admin for template overrides
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tracker',
 ]
 
 MIDDLEWARE = [
