@@ -257,6 +257,85 @@
         color: #1a1a2e !important;
     }
     
+    /* Change list main area - softer background */
+    #changelist {
+        background: #f5f7fa !important;
+    }
+    
+    #changelist .results {
+        background: #ffffff !important;
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    #changelist table {
+        background: #ffffff !important;
+    }
+    
+    #changelist thead th {
+        background: linear-gradient(135deg, #4a5568 0%, #3a4555 100%) !important;
+        color: #ffffff !important;
+        border-bottom: 2px solid #ffc107 !important;
+        padding: 12px 16px !important;
+    }
+    
+    #changelist tbody tr {
+        background: #ffffff !important;
+        border-bottom: 1px solid #f0f0f0 !important;
+    }
+    
+    #changelist tbody tr:hover {
+        background: #f8f9fa !important;
+    }
+    
+    #changelist tbody tr.selected {
+        background: #fff9e6 !important;
+    }
+    
+    /* Toolbar and actions */
+    #toolbar {
+        background: #f8f9fa !important;
+        border-bottom: 1px solid #e0e0e0 !important;
+        padding: 10px 16px !important;
+    }
+    
+    .actions {
+        background: #f8f9fa !important;
+        padding: 10px 16px !important;
+        border-radius: 6px !important;
+    }
+    
+    .actions select {
+        background: #ffffff !important;
+        border: 1px solid #d0d0d0 !important;
+        border-radius: 4px !important;
+        padding: 6px 10px !important;
+    }
+    
+    /* Pagination */
+    .paginator {
+        background: #f8f9fa !important;
+        padding: 12px 16px !important;
+        border-top: 1px solid #e0e0e0 !important;
+    }
+    
+    .paginator a {
+        background: #ffffff !important;
+        border: 1px solid #d0d0d0 !important;
+        padding: 6px 12px !important;
+        border-radius: 4px !important;
+        color: #2a5a9e !important;
+        text-decoration: none !important;
+    }
+    
+    .paginator a:hover {
+        background: #ffc107 !important;
+        border-color: #ffc107 !important;
+        color: #1a1a2e !important;
+    }
+    
     /* ========== DARK MODE OVERRIDES ========== */
     [data-theme="dark"] {
         /* Main content area */
@@ -384,6 +463,80 @@
     
     [data-theme="dark"] #changelist-filter a:hover {
         background: #ffc107 !important;
+        color: #1a1a2e !important;
+    }
+    
+    /* Dark mode change list */
+    [data-theme="dark"] #changelist {
+        background: #1a1a2e !important;
+    }
+    
+    [data-theme="dark"] #changelist .results {
+        background: #2a2d3a !important;
+        border: 1px solid #3a4555 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    [data-theme="dark"] #changelist table {
+        background: #2a2d3a !important;
+    }
+    
+    [data-theme="dark"] #changelist thead th {
+        background: linear-gradient(135deg, #3a4555 0%, #2a3444 100%) !important;
+        color: #ffc107 !important;
+        border-bottom: 2px solid #ffc107 !important;
+    }
+    
+    [data-theme="dark"] #changelist tbody tr {
+        background: #2a2d3a !important;
+        border-bottom: 1px solid #3a4555 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    [data-theme="dark"] #changelist tbody tr:hover {
+        background: #343844 !important;
+    }
+    
+    [data-theme="dark"] #changelist tbody tr.selected {
+        background: #3a4020 !important;
+    }
+    
+    [data-theme="dark"] #changelist tbody td {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Dark mode toolbar and actions */
+    [data-theme="dark"] #toolbar {
+        background: #2a2d3a !important;
+        border-bottom: 1px solid #3a4555 !important;
+    }
+    
+    [data-theme="dark"] .actions {
+        background: #2a2d3a !important;
+    }
+    
+    [data-theme="dark"] .actions select {
+        background: #343844 !important;
+        border: 1px solid #3a4555 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    /* Dark mode pagination */
+    [data-theme="dark"] .paginator {
+        background: #2a2d3a !important;
+        border-top: 1px solid #3a4555 !important;
+        color: #e0e0e0 !important;
+    }
+    
+    [data-theme="dark"] .paginator a {
+        background: #343844 !important;
+        border: 1px solid #3a4555 !important;
+        color: #6ca0dc !important;
+    }
+    
+    [data-theme="dark"] .paginator a:hover {
+        background: #ffc107 !important;
+        border-color: #ffc107 !important;
         color: #1a1a2e !important;
     }
     
