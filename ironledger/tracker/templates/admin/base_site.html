@@ -179,33 +179,18 @@
         background: #ffffff !important;
     }
     
-    /* Dashboard layout - make it balanced */
-    .dashboard #content {
-        width: 100% !important;
-    }
-    
-    .dashboard .module {
-        width: 100% !important;
-    }
-    
-    /* Make app-list full width instead of 60% */
-    #content-main > div:first-child {
-        width: 100% !important;
-        float: none !important;
-    }
-    
-    /* Make recent-actions sidebar full width and positioned below */
+    /* Dashboard sidebar - Recent actions */
     #content-related {
-        width: 100% !important;
-        float: none !important;
-        margin-left: 0 !important;
+        background: transparent !important;
     }
     
-    /* Grid layout for app modules */
-    .dashboard .app-list {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
-        gap: 20px !important;
+    #content-related .module {
+        border: 1px solid #e0e0e0 !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+        margin-bottom: 20px !important;
+        background: #ffffff !important;
     }
     
     .module h2,
@@ -268,6 +253,16 @@
     /* Hide the theme toggle */
     #theme-toggle {
         display: none !important;
+    }
+    
+    /* Dashboard sidebar - match main content background */
+    #content-related {
+        background: transparent !important;
+    }
+    
+    #content-related .module {
+        background: #2a2d3a !important;
+        border: 1px solid #3a4555 !important;
     }
     
     /* Change list filters */
@@ -368,16 +363,25 @@
     /* ========== DARK MODE OVERRIDES ========== */
     [data-theme="dark"] {
         /* Main content area */
-        background-color: #1a1a2e !important;
+        background-color: #2a2d3a !important;
+    }
+    
+    [data-theme="dark"] body {
+        background-color: #2a2d3a !important;
     }
     
     [data-theme="dark"] #content {
-        background-color: #1a1a2e !important;
+        background-color: #2a2d3a !important;
     }
     
     [data-theme="dark"] #content-main {
         background-color: #2a2d3a !important;
         color: #e0e0e0 !important;
+    }
+    
+    /* Dark mode - make sidebar match */
+    [data-theme="dark"] .dashboard #content-related {
+        background-color: #2a2d3a !important;
     }
     
     /* Dark mode breadcrumbs */
@@ -574,6 +578,16 @@
         background-color: #2a2d3a !important;
         border-color: #3a4555 !important;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Dark mode sidebar */
+    [data-theme="dark"] #content-related {
+        background: transparent !important;
+    }
+    
+    [data-theme="dark"] #content-related .module {
+        background-color: #2a2d3a !important;
+        border: 1px solid #3a4555 !important;
     }
     
     /* Dark mode dashboard */
